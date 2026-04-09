@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FitBase">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="manifest" href="manifest.json">
+  <title>FitBase 90</title>
+  <style>
+    :root {
+      --accent: #C8FF00;
+      --bg: #0d0d0d;
+      --card: #161616;
+      --border: #2a2a2a;
+      --muted: #666;
+      --white: #F0F0EC;
+      --blue: #88ccff;
+      --orange: #FF9F00;
+      --red: #FF4D6D;
+      --purple: #c084fc;
+      --teal: #2dd4bf;
+      --st: env(safe-area-inset-top, 0px);
+      --sb: env(safe-area-inset-bottom, 0px);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--white);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;}
+    #app{height:100%;display:flex;flex-direction:column;}
+    .sb{height:var(--st);background:var(--bg);flex-shrink:0;}
+    .screen{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(66px + var(--sb));}
+    .sh{padding:16px 16px 12px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--border);}
+    .sh-title{font-size:26px;font-weight:800;letter-spacing:-0.02em;}
+    .sh-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+    .sb-body{padding:14px 14px 0;}
+    .bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,13,13,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding-bottom:var(--sb);z-index:100;}
+    .ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 0 7px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;gap:3px;transition:color 0.15s;}
+    .ni.on{color:var(--accent);}
+    .ni svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+    .ct{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:11px;}
+    .srow{display:flex;gap:10px;margin-bottom:12px;}
+    .sc{flex:1;background:#1a1a1a;border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;}
+    .sn{font-size:22px;font-weight:800;line-height:1;color:var(--accent);}
+    .sl{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:0.07em;text-transform:uppercase;}
+    .btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border-radius:10px;font-size:15px;font-weight:700;border:none;cursor:pointer;width:100%;margin-bottom:10px;-webkit-appearance:none;}
+    .btn:active{opacity:0.7;}
+    .btn-p{background:var(--accent);color:#000;}
+    .btn-s{background:#1c1c1c;color:var(--white);border:1px solid var(--border);}
+    .input{width:100%;background:#1c1c1c;border:1px solid var(--border);border-radius:10px;padding:13px 14px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none;}
+    .input:focus{border-color:var(--accent);}
+    .ilabel{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;letter-spacing:0.06em;text-transform:uppercase;}
+    .igroup{margin-bottom:14px;}
+    .note{background:#1a1a1a;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:11px 13px;font-size:13px;color:#ccc;margin-bottom:12px;line-height:1.6;}
+    .exrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+    .exrow:last-child{border-bottom:none;}
+    .exn{font-size:13px;font-weight:500;line-height:1.3;}
+    .exs{font-size:12px;color:var(--accent);font-weight:700;text-align:right;min-width:80px;}
+    .slbl{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;margin:12px 0 4px;}
+    .wcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+    .wch{display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+    .wcb{display:none;margin-top:14px;}
+    .wcard.open .wcb{display:block;}
+    .wcard.open .ebtn{transform:rotate(45deg);}
+    .ebtn{width:28px;height:28px;background:#222;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--accent);transition:transform 0.2s;flex-shrink:0;}
+    .ptabs{display:flex;gap:8px;margin-bottom:14px;}
+    .ptab{flex:1;padding:9px 5px;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;text-align:center;transition:all 0.15s;line-height:1.3;}
+    .stabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
+    .stabs::-webkit-scrollbar{display:none;}
+    .stab{padding:10px 14px;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s;}
+    .stab.on{color:var(--accent);border-bottom-color:var(--accent);}
+    .strbdg{display:inline-flex;align-items:center;gap:5px;background:rgba(200,255,0,0.1);border:1px solid rgba(200,255,0,0.25);border-radius:20px;padding:4px 11px;font-size:13px;font-weight:700;color:var(--accent);}
+    .tcard{background:linear-gradient(135deg,#161616 0%,#1b200a 100%);border:1px solid rgba(200,255,0,0.2);border-radius:14px;padding:18px;margin-bottom:12px;}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-end;backdrop-filter:blur(4px);}
+    .msheet{background:#1a1a1a;border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--sb));width:100%;border-top:1px solid var(--border);max-height:85vh;overflow-y:auto;}
+    .mhandle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+    .mtitle{font-size:20px;font-weight:800;margin-bottom:16px;}
+    .lentry{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+    .lentry:last-child{border-bottom:none;}
+    .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;}
+    .mitem{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border);gap:12px;}
+    .mitem:last-child{border-bottom:none;}
+    .div{height:1px;background:var(--border);margin:12px 0;}
+    .ob{display:flex;flex-direction:column;justify-content:center;min-height:100%;padding:40px 22px;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .dayopt{background:#1a1a1a;border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all 0.15s;}
+    .dayopt.sel{border-color:var(--accent);background:rgba(200,255,0,0.08);}
+    select.input{background:#1c1c1c;}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+// ─────────────────────────────────────────
+// PLAN DATA
+// ─────────────────────────────────────────
+const PHASES=[
+  {n:1,label:"Phase 1",weeks:"Weeks 1–4",theme:"Foundation",color:"#C8FF00",
+   goal:"Wake up the body. Build the habit. Perfect form over everything. No ego.",
+   runNote:"Wk 1–2: 1 min jog / 2 min walk ×7 (21 min)\nWk 3–4: 90 sec jog / 90 sec walk ×7 (21 min)",
+   days:[
+    {id:"A",name:"Day A",focus:"Lower Body + Push",dur:"58 min",
+     warmup:"5 min treadmill walk + leg swings",
+     secs:[
+      {l:"Lower Body",c:"#C8FF00",exs:[{n:"Bodyweight Squat",s:"3 × 15"},{n:"Hip Thrust (bodyweight)",s:"3 × 15"},{n:"Lateral Band Walk",s:"3 × 20 each"},{n:"Reverse Lunge",s:"3 × 10 each"}]},
+      {l:"Upper Push",c:"#FF9F00",exs:[{n:"Push-Ups",s:"3 × 10–15"},{n:"Band Chest Press",s:"3 × 12"},{n:"Band Lateral Raise",s:"3 × 12"}]},
+     ],mob:"Hip flexor lunge (90s each), pigeon (90s each), doorway chest stretch (60s), thoracic rotation ×10, child's pose 60s"},
+    {id:"B",name:"Day B",focus:"Pull + Run + Core",dur:"55 min",
+     warmup:"3 min walk warm-up",
+     secs:[
+      {l:"Run Intervals",c:"#88ccff",exs:[{n:"Treadmill Intervals",s:"20 min (1 min jog / 2 min walk)"}]},
+      {l:"Upper Pull",c:"#88ccff",exs:[{n:"Band Row",s:"3 × 15"},{n:"Band Bicep Curl",s:"3 × 15"},{n:"Band Face Pull",s:"3 × 15"}]},
+      {l:"Core",c:"#c084fc",exs:[{n:"Dead Bug",s:"3 × 10 each"},{n:"Bird Dog",s:"3 × 10 each"},{n:"Plank Hold",s:"3 × 30 sec"}]},
+     ],mob:"Standing forward fold 90s, seated straddle 90s, butterfly 90s, neck + shoulder rolls 2 min"},
+    {id:"C",name:"Day C",focus:"Lower Body + Push (Posterior)",dur:"58 min",
+     warmup:"5 min walk + hip circles",
+     secs:[
+      {l:"Lower Body (Glute Focus)",c:"#C8FF00",exs:[{n:"Romanian Deadlift (band)",s:"3 × 12"},{n:"Donkey Kick (band)",s:"3 × 15 each"},{n:"Glute Bridge Hold",s:"3 × 30 sec"},{n:"Calf Raises",s:"3 × 20"}]},
+      {l:"Upper Push",c:"#FF9F00",exs:[{n:"Tricep Dips (chair)",s:"3 × 10"},{n:"Pike Push-Up Prep",s:"3 × 8"},{n:"Band Overhead Press",s:"3 × 12"}]},
+     ],mob:"Low lunge 2 min each, half split 90s each, figure-4 90s each, wrist circles + shoulder CARs 3 min"},
+    {id:"D",name:"Day D",focus:"Pull + Conditioning Run",dur:"52 min",
+     warmup:"3 min walk",
+     secs:[
+      {l:"Run Intervals",c:"#88ccff",exs:[{n:"Treadmill Intervals",s:"20 min (1 min jog / 2 min walk)"}]},
+      {l:"Upper Pull",c:"#88ccff",exs:[{n:"Band Pull-Apart",s:"3 × 20"},{n:"Band Row (wide grip)",s:"3 × 15"},{n:"Band Bicep Curl",s:"3 × 12"}]},
+      {l:"Finisher",c:"#FF4D6D",exs:[{n:"Squat to Press (band)",s:"2 × 15"},{n:"Mountain Climbers",s:"2 × 30 sec"}]},
+     ],mob:"Seated hamstring 90s each, calf stretch 60s each, quad stretch 60s each, deep squat hold 90s"},
+   ]},
+  {n:2,label:"Phase 2",weeks:"Weeks 5–8",theme:"Build",color:"#FF9F00",
+   goal:"Volume increases. Running becomes continuous. Strength gains become visible.",
+   runNote:"Wk 5–6: 2 min jog / 1 min walk ×8 (24 min)\nWk 7–8: Attempt 20 min continuous jog",
+   days:[
+    {id:"A",name:"Day A",focus:"Lower Body + Push",dur:"60 min",
+     warmup:"5 min treadmill + leg swings + hip circles",
+     secs:[
+      {l:"Lower Body",c:"#C8FF00",exs:[{n:"Banded Squat",s:"4 × 15"},{n:"Hip Thrust with Band",s:"4 × 15"},{n:"Lateral Band Walk",s:"4 × 20 each"},{n:"Bulgarian Split Squat (prep)",s:"3 × 8 each"}]},
+      {l:"Upper Push",c:"#FF9F00",exs:[{n:"Full Push-Up",s:"3 × 12"},{n:"Band Chest Press",s:"3 × 15"},{n:"Band Lateral Raise",s:"3 × 15"}]},
+     ],mob:"90/90 hip (2 min each), deep pigeon (2 min each), couch stretch (90s each), doorway chest opener, thoracic extensions 2 min"},
+    {id:"B",name:"Day B",focus:"Pull + Run + Core",dur:"58 min",
+     warmup:"3 min walk",
+     secs:[
+      {l:"Run",c:"#88ccff",exs:[{n:"Treadmill Intervals",s:"25 min (2 min jog / 1 min walk)"}]},
+      {l:"Upper Pull",c:"#88ccff",exs:[{n:"Band Row",s:"3 × 15"},{n:"Band Face Pull",s:"3 × 15"},{n:"Band Bicep Curl",s:"3 × 15"}]},
+      {l:"Core",c:"#c084fc",exs:[{n:"Hollow Body Hold",s:"3 × 20 sec"},{n:"Side Plank",s:"3 × 25 sec each"},{n:"Dead Bug",s:"3 × 12 each"}]},
+     ],mob:"Forward fold 2 min, seated straddle 2 min, active butterfly 90s, neck stretch 2 min, shoulder cross-body 90s each"},
+    {id:"C",name:"Day C",focus:"Lower Body + Push (Posterior)",dur:"60 min",
+     warmup:"5 min walk + hip circles",
+     secs:[
+      {l:"Lower Body (Glute/Posterior)",c:"#C8FF00",exs:[{n:"Single-Leg RDL (band)",s:"3 × 10 each"},{n:"Single-Leg Hip Thrust",s:"3 × 12 each"},{n:"Donkey Kick with Band",s:"3 × 15 each"},{n:"Single-Leg Calf Raise",s:"3 × 15 each"}]},
+      {l:"Upper Push",c:"#FF9F00",exs:[{n:"Pike Push-Up",s:"3 × 8"},{n:"Diamond Push-Up",s:"3 × 8"},{n:"Band Overhead Press",s:"3 × 15"}]},
+     ],mob:"Low lunge to half split flow (3 min each), pancake stretch 2 min, hip flexor PNF ×3 each, wrist prep 3 min"},
+    {id:"D",name:"Day D",focus:"Pull + Conditioning Run",dur:"55 min",
+     warmup:"3 min walk",
+     secs:[
+      {l:"Run",c:"#88ccff",exs:[{n:"Treadmill Intervals",s:"25 min (2 min jog / 1 min walk)"}]},
+      {l:"Upper Pull",c:"#88ccff",exs:[{n:"Band Pull-Apart",s:"3 × 25"},{n:"Single-Arm Band Row",s:"3 × 12 each"},{n:"Band Bicep Curl",s:"3 × 15"}]},
+      {l:"Finisher",c:"#FF4D6D",exs:[{n:"Jump Squat",s:"3 × 12"},{n:"Inchworm",s:"3 × 8"},{n:"Plank to Down Dog",s:"3 × 10"}]},
+     ],mob:"Deep squat 2 min, ankle CARs ×10, hamstring PNF ×3, calf stretch 60s each, quad stretch 60s each"},
+   ]},
+  {n:3,label:"Phase 3",weeks:"Weeks 9–12",theme:"Solidify",color:"#FF4D6D",
+   goal:"Run a 5K. Front split within reach. Body composition visibly shifted.",
+   runNote:"Wk 9–10: 30 min continuous at conversational pace\nWk 11–12: 5K simulation — finish strong",
+   days:[
+    {id:"A",name:"Day A",focus:"Lower Body + Push (Advanced)",dur:"60 min",
+     warmup:"5 min treadmill + leg swings + hip CARs",
+     secs:[
+      {l:"Lower Body",c:"#C8FF00",exs:[{n:"Bulgarian Split Squat",s:"3 × 10 each"},{n:"Hip Thrust with Band (heavy)",s:"4 × 15"},{n:"Banded Lateral Squat",s:"3 × 12 each"},{n:"Nordic Curl Eccentric",s:"3 × 5 slow"}]},
+      {l:"Upper Push",c:"#FF9F00",exs:[{n:"Decline Push-Up",s:"3 × 12"},{n:"Pike Push-Up",s:"3 × 10"},{n:"Band Lateral Raise",s:"3 × 15"}]},
+     ],mob:"Front split dominant side 3 min, non-dominant 2 min, middle split straddle 3 min, deep pigeon 90s each, PNF ×4"},
+    {id:"B",name:"Day B",focus:"Pull + 5K Run + Core",dur:"58 min",
+     warmup:"3 min walk",
+     secs:[
+      {l:"Run",c:"#88ccff",exs:[{n:"Continuous Run",s:"30+ min, conversational pace"}]},
+      {l:"Upper Pull",c:"#88ccff",exs:[{n:"Band Row",s:"3 × 15"},{n:"Band Face Pull",s:"3 × 15"},{n:"Band Bicep Curl",s:"3 × 15"}]},
+      {l:"Core",c:"#c084fc",exs:[{n:"Hollow Body Hold",s:"3 × 30 sec"},{n:"V-Sit Hold",s:"3 × 15 sec"},{n:"Plank Shoulder Tap",s:"3 × 15 each"}]},
+     ],mob:"Forward fold 2 min, straddle walkout 2 min, shoulder band stretch 90s each, thoracic rotation ×10, bridge hold 3×30s"},
+    {id:"C",name:"Day C",focus:"Lower Body + Push (Mobility-heavy)",dur:"60 min",
+     warmup:"5 min walk + hip + wrist prep",
+     secs:[
+      {l:"Lower Body (Glute/Hamstring)",c:"#C8FF00",exs:[{n:"Single-Leg Hip Thrust",s:"4 × 12 each"},{n:"Donkey Kick (band, heavy)",s:"3 × 15 each"},{n:"Sumo Squat (slow tempo)",s:"3 × 15"},{n:"Elevated Calf Raise",s:"3 × 20"}]},
+      {l:"Upper Push (Calisthenics)",c:"#FF9F00",exs:[{n:"Archer Push-Up (partial)",s:"3 × 6 each"},{n:"Handstand Wall Hold",s:"3 × 15 sec"},{n:"Band Overhead Press",s:"3 × 15"}]},
+     ],mob:"Full front split attempt 3 min each, middle split 3 min, back bridge ×3 20s, shoulder band stretch 2 min, wrist flow 2 min"},
+    {id:"D",name:"Day D",focus:"Pull + 5K Race Simulation",dur:"55 min",
+     warmup:"5 min easy walk",
+     secs:[
+      {l:"5K Race Day",c:"#FF4D6D",exs:[{n:"Run 5K (3.1 miles)",s:"Goal: FINISH. Time is secondary."}]},
+      {l:"Upper Pull",c:"#88ccff",exs:[{n:"Band Pull-Apart",s:"3 × 25"},{n:"Single-Arm Band Row",s:"3 × 12 each"},{n:"Band Face Pull",s:"3 × 15"}]},
+     ],mob:"15 min full body celebration — hips, hamstrings, calves, front split, shoulders, thoracic, neck. You earned it."},
+   ]},
+];
+
+const MORNING=[
+  {n:"Cat-Cow",h:"10 reps, slow",note:"Wakes up the spine"},
+  {n:"Child's Pose",h:"60 sec",note:"Hip flexors + thoracic"},
+  {n:"Hip Flexor Lunge",h:"60 sec each side",note:"Counters sitting tightness"},
+  {n:"Thoracic Rotation",h:"10 each side",note:"Posture reset"},
+  {n:"Shoulder CARs",h:"5 each direction",note:"Joint health"},
+];
+const EVENING=[
+  {n:"Standing Forward Fold",h:"2 min",note:"Hamstrings + low back"},
+  {n:"Low Lunge (Couch Stretch)",h:"90 sec each",note:"Hip flexor depth"},
+  {n:"Half Split Hold",h:"90 sec each",note:"Hamstring lengthening"},
+  {n:"Pigeon Pose",h:"90 sec each",note:"Deep glute + hip opener"},
+  {n:"Seated Straddle",h:"2 min",note:"Middle split progress"},
+];
+const POSTURE=[
+  {p:"Forward Head",c:"Phone + desk use",f:"Chin tucks 3×10 daily, neck stretches every morning, band face pulls every pull session",col:"#FF4D6D"},
+  {p:"Rounded Shoulders",c:"Tight chest, weak upper back",f:"Band face pulls (every pull day), doorway chest stretch daily, pull-aparts 3×/week — this plan hits these directly",col:"#FF9F00"},
+  {p:"Anterior Pelvic Tilt",c:"Tight hip flexors, weak glutes + core",f:"Hip thrusts every lower day, couch stretch daily, dead bug + hollow body core work — this plan was designed for this",col:"#c084fc"},
+];
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+const S={
+  d:{startDate:null,startWeight:null,weights:[],runs:[],workouts:[],mobility:[]},
+  tab:'home',pp:0,mt:'daily',mr:'morning',modal:null,
+  load(){const r=localStorage.getItem('fb90');if(r)try{this.d=JSON.parse(r);}catch(e){}},
+  save(){localStorage.setItem('fb90',JSON.stringify(this.d));},
+  get ok(){return!!this.d.startDate;},
+  get dayN(){
+    if(!this.d.startDate)return 0;
+    const diff=Math.floor((new Date()-new Date(this.d.startDate))/86400000);
+    return Math.max(1,Math.min(diff+1,90));
+  },
+  get phase(){const d=this.dayN;return d<=28?0:d<=56?1:2;},
+  get week(){return Math.ceil(this.dayN/7);},
+  get streak(){
+    if(!this.d.workouts.length)return 0;
+    const dates=[...new Set(this.d.workouts.map(w=>w.date))].sort().reverse();
+    const today=td();const yest=new Date(Date.now()-86400000).toISOString().slice(0,10);
+    if(dates[0]!==today&&dates[0]!==yest)return 0;
+    let s=0;
+    for(let i=0;i<dates.length;i++){
+      const diff=Math.round((new Date(dates[0])-new Date(dates[i]))/86400000);
+      if(diff===i)s++;else break;
+    }
+    return s;
+  },
+  get mobToday(){
+    const t=td();return this.d.mobility.find(m=>m.date===t)||{date:t,morning:false,evening:false};
+  },
+  togMob(type){
+    const t=td();let e=this.d.mobility.find(m=>m.date===t);
+    if(!e){e={date:t,morning:false,evening:false};this.d.mobility.push(e);}
+    e[type]=!e[type];this.save();
+  },
+  logW(w){
+    const t=td();const i=this.d.weights.findIndex(x=>x.date===t);
+    if(i>=0)this.d.weights[i].weight=w;else this.d.weights.push({date:t,weight:w});
+    this.d.weights.sort((a,b)=>a.date.localeCompare(b.date));this.save();
+  },
+  logRun(dist,time,notes=''){this.d.runs.push({date:td(),distanceMi:dist,timeMin:time,notes});this.save();},
+  logWorkout(dayId){this.d.workouts.push({date:td(),dayId,phaseN:this.phase+1});this.save();},
+  setup(date,weight){
+    this.d.startDate=date;this.d.startWeight=parseFloat(weight);
+    this.d.weights=[{date,weight:parseFloat(weight)}];this.save();
+  },
+};
+
+function td(){return new Date().toISOString().slice(0,10);}
+function fmtDate(s){const d=new Date(s+'T12:00:00');return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function pace(mi,min){if(!mi||!min)return'—';const p=min/mi;const m=Math.floor(p);const s=Math.round((p-m)*60);return`${m}:${s.toString().padStart(2,'0')}/mi`;}
+
+// ─────────────────────────────────────────
+// RENDER ENGINE
+// ─────────────────────────────────────────
+let selDay=null;
+
+function render(){
+  const app=document.getElementById('app');
+  if(!S.ok){app.innerHTML=renderOB();bindOB();return;}
+  app.innerHTML=`
+    <div class="sb"></div>
+    <div class="screen" id="scr">${renderScreen()}</div>
+    ${renderNav()}
+    ${S.modal?renderModal():''}
+  `;
+  bind();
+}
+
+function renderScreen(){
+  switch(S.tab){
+    case'home':return renderHome();
+    case'plan':return renderPlan();
+    case'mobility':return renderMobility();
+    case'log':return renderLog();
+    case'progress':return renderProgress();
+  }
+  return '';
+}
+
+// ─── ONBOARDING ───
+function renderOB(){
+  return`<div class="screen" style="background:var(--bg)"><div class="ob">
+    <div style="font-size:11px;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:6px;">Welcome to</div>
+    <div style="font-size:40px;font-weight:800;letter-spacing:-0.02em;line-height:1;margin-bottom:6px;">FitBase 90</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.5;">Your personal 90-day fitness, strength &amp; mobility program.</div>
+    <div class="igroup"><label class="ilabel">Program Start Date</label><input class="input" type="date" id="ob-d" value="${td()}" max="${td()}"></div>
+    <div class="igroup"><label class="ilabel">Starting Weight (lbs)</label><input class="input" type="number" id="ob-w" placeholder="215" inputmode="decimal"></div>
+    <button class="btn btn-p" id="ob-go" style="margin-top:8px;">Start My Program →</button>
+    <div style="font-size:11px;color:#333;text-align:center;margin-top:16px;line-height:1.6;">All data stays on your device.<br>Nothing is sent anywhere.</div>
+  </div></div>`;
+}
+function bindOB(){
+  document.getElementById('ob-go').addEventListener('click',()=>{
+    const date=document.getElementById('ob-d').value;
+    const weight=document.getElementById('ob-w').value;
+    if(!date||!weight){alert('Please fill in both fields.');return;}
+    S.setup(date,weight);render();
+  });
+}
+
+// ─── NAV ───
+function renderNav(){
+  const items=[
+    {id:'home',label:'Home',svg:'<circle cx="9" cy="9" r="3"/><path d="M13 21v-7a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v7"/><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'},
+    {id:'plan',label:'Plan',svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/>'},
+    {id:'mobility',label:'Mobility',svg:'<path d="M12 2a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M6 11c0 3.31 2.69 6 6 6s6-2.69 6-6"/><line x1="12" y1="17" x2="12" y2="21"/>'},
+    {id:'log',label:'Log',svg:'<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'},
+    {id:'progress',label:'Progress',svg:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
+  ];
+  return`<nav class="bnav">${items.map(i=>`<button class="ni${S.tab===i.id?' on':''}" data-tab="${i.id}"><svg viewBox="0 0 24 24">${i.svg}</svg><span>${i.label}</span></button>`).join('')}</nav>`;
+}
+
+// ─── HOME ───
+function renderHome(){
+  const ph=PHASES[S.phase];
+  const mob=S.mobToday;
+  const lastW=S.d.weights.length?S.d.weights[S.d.weights.length-1].weight:S.d.startWeight||215;
+  const lost=S.d.startWeight?(S.d.startWeight-lastW).toFixed(1):'—';
+  const today=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const todayLogged=S.d.workouts.some(w=>w.date===td());
+  const nextDay=ph.days[S.d.workouts.length%4];
+  return`
+    <div class="sh">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:1px;">${today}</div>
+          <div class="sh-title">FitBase 90</div>
+        </div>
+        <div class="strbdg">🔥 ${S.streak} day${S.streak!==1?'s':''}</div>
+      </div>
+    </div>
+    <div class="sb-body">
+      <div class="srow" style="margin-top:4px;">
+        <div class="sc"><div class="sn">Day ${S.dayN}</div><div class="sl">of 90</div></div>
+        <div class="sc"><div class="sn" style="color:${ph.color};">Wk ${S.week}</div><div class="sl">${ph.theme}</div></div>
+        <div class="sc"><div class="sn" style="color:var(--red);">−${lost}</div><div class="sl">lbs lost</div></div>
+      </div>
+      <div class="tcard">
+        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:7px;">${todayLogged?'✓ Today Complete':"Today's Workout"}</div>
+        <div style="font-size:19px;font-weight:800;margin-bottom:3px;">${nextDay.name} — ${nextDay.focus}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:${todayLogged?'0':'14px'};">${ph.label} · ${nextDay.dur}</div>
+        ${todayLogged?`<div style="font-size:13px;color:var(--accent);margin-top:8px;">Great work today! 💪</div>`:
+        `<button class="btn btn-p" data-qlog="${nextDay.id}" style="margin-bottom:0;margin-top:2px;">Log This Workout ✓</button>`}
+      </div>
+      <div class="card">
+        <div class="ct">Today's Mobility</div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;background:#1a1a1a;border:1px solid ${mob.morning?'var(--teal)':'var(--border)'};border-radius:10px;padding:14px;text-align:center;cursor:pointer;" data-mob="morning">
+            <div style="font-size:20px;margin-bottom:4px;">☀️</div>
+            <div style="font-size:12px;font-weight:700;color:${mob.morning?'var(--teal)':'var(--muted)'};">Morning</div>
+            <div style="font-size:10px;color:#444;margin-top:2px;">10 min</div>
+            ${mob.morning?`<div style="font-size:11px;color:var(--teal);margin-top:4px;font-weight:700;">✓ Done</div>`:''}
+          </div>
+          <div style="flex:1;background:#1a1a1a;border:1px solid ${mob.evening?'var(--purple)':'var(--border)'};border-radius:10px;padding:14px;text-align:center;cursor:pointer;" data-mob="evening">
+            <div style="font-size:20px;margin-bottom:4px;">🌙</div>
+            <div style="font-size:12px;font-weight:700;color:${mob.evening?'var(--purple)':'var(--muted)'};">Evening</div>
+            <div style="font-size:10px;color:#444;margin-top:2px;">10 min</div>
+            ${mob.evening?`<div style="font-size:11px;color:var(--purple);margin-top:4px;font-weight:700;">✓ Done</div>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Quick Log</div>
+        <div class="grid2">
+          <button class="btn btn-s" data-modal="weight" style="margin:0;font-size:13px;padding:12px;">⚖️ Weight</button>
+          <button class="btn btn-s" data-modal="run" style="margin:0;font-size:13px;padding:12px;">🏃 Run</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── PLAN ───
+function renderPlan(){
+  const ph=PHASES[S.pp];
+  return`
+    <div class="sh"><div class="sh-title">The Plan</div><div class="sh-sub">3 phases · 4 days/week · 2× muscle frequency</div></div>
+    <div class="sb-body">
+      <div class="ptabs">
+        ${PHASES.map((p,i)=>`<button class="ptab${S.pp===i?' ':''}" data-pp="${i}" style="${S.pp===i?`border-color:${p.color};background:${p.color}22;color:${p.color}`:''}">${p.label}<br><span style="font-size:9px;opacity:0.7">${p.weeks}</span></button>`).join('')}
+      </div>
+      <div class="note" style="border-left-color:${ph.color};"><strong style="color:${ph.color};">${ph.theme}:</strong> ${ph.goal}</div>
+      ${ph.days.map(day=>`
+        <div class="wcard" id="wc${day.id}${ph.n}">
+          <div class="wch" data-tog="wc${day.id}${ph.n}">
+            <div>
+              <div style="font-size:10px;color:var(--muted);letter-spacing:0.09em;text-transform:uppercase;margin-bottom:2px;">${day.name} · ${day.dur}</div>
+              <div style="font-size:15px;font-weight:700;">${day.focus}</div>
+            </div>
+            <div class="ebtn">+</div>
+          </div>
+          <div class="wcb">
+            <div class="note" style="margin-bottom:12px;"><strong style="color:var(--accent);">Warm-up:</strong> ${day.warmup}</div>
+            ${day.secs.map(sec=>`
+              <div class="slbl" style="color:${sec.c};">${sec.l}</div>
+              ${sec.exs.map((ex,i)=>`<div class="exrow" style="${i===sec.exs.length-1?'border-bottom:none;':''}"><span class="exn">${ex.n}</span><span class="exs" style="color:${sec.c};">${ex.s}</span></div>`).join('')}
+            `).join('')}
+            <div class="note" style="margin-top:12px;border-left-color:var(--teal);"><strong style="color:var(--teal);">🧘 Mobility:</strong> ${day.mob}</div>
+          </div>
+        </div>
+      `).join('')}
+      <div class="card">
+        <div class="ct">Running Progression</div>
+        <div style="font-size:13px;color:#bbb;line-height:1.8;white-space:pre-line;">${ph.runNote}</div>
+      </div>
+    </div>`;
+}
+
+// ─── MOBILITY ───
+function renderMobility(){
+  const mob=S.mobToday;
+  return`
+    <div class="sh"><div class="sh-title">Mobility</div><div class="sh-sub">20 min/day · Every day including rest days</div></div>
+    <div class="sb-body">
+      <div class="stabs">
+        ${[['daily','Daily Routine'],['splits','Splits'],['posture','Posture']].map(([k,l])=>`<button class="stab${S.mt===k?' on':''}" data-mt="${k}">${l}</button>`).join('')}
+      </div>
+      ${S.mt==='daily'?renderDailyMob(mob):''}
+      ${S.mt==='splits'?renderSplits():''}
+      ${S.mt==='posture'?renderPosture():''}
+    </div>`;
+}
+
+function renderDailyMob(mob){
+  const isMorn=S.mr==='morning';
+  const list=isMorn?MORNING:EVENING;
+  const col=isMorn?'var(--accent)':'var(--purple)';
+  const mk=isMorn?'morning':'evening';
+  const done=mob[mk];
+  return`
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <button class="btn${S.mr==='morning'?' btn-p':' btn-s'}" style="margin:0;flex:1;font-size:13px;padding:11px;" data-mr="morning">☀️ Morning</button>
+      <button class="btn${S.mr==='evening'?' btn-p':' btn-s'}" style="margin:0;flex:1;font-size:13px;padding:11px;" data-mr="evening">🌙 Evening</button>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="ct" style="color:${col};margin-bottom:0;">${isMorn?'Morning':'Evening'} Routine · 10 min</div>
+        <button data-mob="${mk}" style="background:${done?col:'transparent'};border:1px solid ${done?col:'var(--border)'};border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:${done?'#000':'var(--muted)'};cursor:pointer;">${done?'✓ Done':'Mark Done'}</button>
+      </div>
+      ${list.map(ex=>`
+        <div class="mitem">
+          <div><div style="font-size:14px;font-weight:600;">${ex.n}</div><div style="font-size:11px;color:#555;margin-top:2px;">${ex.note}</div></div>
+          <div style="font-size:12px;color:${col};font-weight:700;text-align:right;min-width:90px;">${ex.h}</div>
+        </div>`).join('')}
+    </div>
+    ${!isMorn?`<div class="note" style="border-left-color:var(--orange);"><strong style="color:var(--orange);">PNF Tip:</strong> Hold 30 sec → contract gently 5 sec → relax deeper. Repeat ×3. Unlocks flexibility faster than passive holding alone.</div>`:''}`;
+}
+
+function renderSplits(){
+  return`
+    <div class="card">
+      <div class="ct" style="color:var(--purple);">Front Split Progression</div>
+      ${[
+        {p:"Weeks 1–3",d:"Assess gap. Low lunge + half split daily. Let gravity work — never force."},
+        {p:"Weeks 4–6",d:"Add PNF contractions to hip flexor + hamstring. Half split 90s each side."},
+        {p:"Weeks 7–9",d:"Full split attempt daily. Use books/blocks under hands. Target gap under 3 inches."},
+        {p:"Weeks 10–12",d:"Sink in with support, then try without. Dominant side touching down is the goal."},
+      ].map((x,i)=>`<div style="margin-bottom:${i<3?'13px':'0'};padding-bottom:${i<3?'13px':'0'};border-bottom:${i<3?'1px solid var(--border)':'none'};"><div style="font-size:12px;color:var(--purple);font-weight:700;margin-bottom:3px;">${x.p}</div><div style="font-size:13px;color:#ccc;line-height:1.5;">${x.d}</div></div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="ct" style="color:var(--teal);">Middle Split Progression</div>
+      ${[
+        {p:"Weeks 1–3",d:"Seated straddle — sit tall, walk hands forward, hold 2 min. Note your starting angle."},
+        {p:"Weeks 4–6",d:"Add butterfly + straddle combo. Lean forward from hips, not the waist."},
+        {p:"Weeks 7–9",d:"Active straddle (lift legs slightly) to build active flexibility. Target 110–120°."},
+        {p:"Weeks 10–12",d:"Target 130+°. Middle splits are slower than front — consistency wins."},
+      ].map((x,i)=>`<div style="margin-bottom:${i<3?'13px':'0'};padding-bottom:${i<3?'13px':'0'};border-bottom:${i<3?'1px solid var(--border)':'none'};"><div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:3px;">${x.p}</div><div style="font-size:13px;color:#ccc;line-height:1.5;">${x.d}</div></div>`).join('')}
+    </div>`;
+}
+
+function renderPosture(){
+  return`
+    <div class="note" style="border-left-color:var(--orange);">The same 3 issues from phone + desk use: forward head, rounded shoulders, anterior pelvic tilt. This plan attacks all three.</div>
+    ${POSTURE.map(x=>`
+      <div class="card" style="border-left:3px solid ${x.col}44;">
+        <div style="font-size:15px;font-weight:700;color:${x.col};margin-bottom:3px;">${x.p}</div>
+        <div style="font-size:11px;color:#555;margin-bottom:8px;">Cause: ${x.c}</div>
+        <div style="font-size:13px;color:#ccc;line-height:1.5;">${x.f}</div>
+      </div>`).join('')}
+    <div class="card">
+      <div class="ct" style="color:var(--orange);">Add to Morning Routine</div>
+      ${[
+        {n:"Chin Tucks",s:"3 × 10",note:"Stand against wall, pull head straight back"},
+        {n:"Wall Angels",s:"3 × 10",note:"Back flat on wall, arms slide up and down"},
+        {n:"Glute Squeeze Hold",s:"3 × 10 sec",note:"Activates glutes at rest, reduces pelvic tilt"},
+      ].map((ex,i)=>`<div class="mitem" style="${i===2?'border-bottom:none;':''}"><div><div style="font-size:14px;font-weight:600;">${ex.n}</div><div style="font-size:11px;color:#555;margin-top:2px;">${ex.note}</div></div><div style="font-size:12px;color:var(--orange);font-weight:700;">${ex.s}</div></div>`).join('')}
+    </div>`;
+}
+
+// ─── LOG ───
+function renderLog(){
+  const all=[
+    ...S.d.workouts.map(w=>({...w,type:'workout'})),
+    ...S.d.runs.map(r=>({...r,type:'run'})),
+    ...S.d.weights.slice(1).map(w=>({...w,type:'weight'})),
+  ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
+  return`
+    <div class="sh"><div class="sh-title">Log</div><div class="sh-sub">Track every rep, mile &amp; pound</div></div>
+    <div class="sb-body">
+      <div class="grid2" style="margin-bottom:10px;">
+        <button class="btn btn-p" data-modal="workout" style="margin:0;font-size:14px;padding:13px;">💪 Workout</button>
+        <button class="btn btn-p" data-modal="run" style="margin:0;font-size:14px;padding:13px;background:var(--blue);color:#000;">🏃 Run</button>
+        <button class="btn btn-s" data-modal="weight" style="margin:0;font-size:14px;padding:13px;">⚖️ Weight</button>
+        <button class="btn btn-s" data-mob-go style="margin:0;font-size:14px;padding:13px;color:var(--teal);border-color:#2dd4bf22;">🧘 Mobility</button>
+      </div>
+      <div class="card">
+        <div class="ct">Recent Activity</div>
+        ${all.length===0?'<div style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0;">No activity logged yet.<br>Get after it!</div>':
+        all.map(e=>`
+          <div class="lentry">
+            <div>
+              <div style="font-size:13px;font-weight:600;">
+                ${e.type==='workout'?`Day ${e.dayId} — Phase ${e.phaseN} Workout`:e.type==='run'?`${e.distanceMi} mi · ${e.timeMin} min · ${pace(e.distanceMi,e.timeMin)}`:`${e.weight} lbs`}
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">${fmtDate(e.date)}</div>
+            </div>
+            <span class="pill" style="${e.type==='workout'?'background:rgba(200,255,0,0.1);color:var(--accent);':e.type==='run'?'background:rgba(136,204,255,0.1);color:var(--blue);':'background:rgba(255,77,109,0.1);color:var(--red);'}">${e.type==='workout'?'💪':e.type==='run'?'🏃':'⚖️'}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ─── PROGRESS ───
+function renderProgress(){
+  const ws=S.d.weights;
+  const runs=S.d.runs;
+  const startW=S.d.startWeight||215;
+  const curW=ws.length?ws[ws.length-1].weight:startW;
+  const lost=(startW-curW).toFixed(1);
+  const goal=175;
+  const pct=Math.min(100,Math.max(0,((startW-curW)/(startW-goal)*100))).toFixed(0);
+  const dayPct=(S.dayN/90*100).toFixed(0);
+  const mobDays=S.d.mobility.filter(m=>m.morning||m.evening).length;
+  return`
+    <div class="sh"><div class="sh-title">Progress</div><div class="sh-sub">Day ${S.dayN} of 90 · ${PHASES[S.phase].theme}</div></div>
+    <div class="sb-body">
+      <div class="srow">
+        <div class="sc" style="border-color:#FF4D6D22;"><div class="sn" style="color:var(--red);">−${lost}</div><div class="sl">lbs lost</div></div>
+        <div class="sc" style="border-color:rgba(200,255,0,0.15);"><div class="sn">${S.d.workouts.length}</div><div class="sl">workouts</div></div>
+        <div class="sc" style="border-color:rgba(136,204,255,0.15);"><div class="sn" style="color:var(--blue);">${runs.length}</div><div class="sl">runs</div></div>
+        <div class="sc" style="border-color:rgba(45,212,191,0.15);"><div class="sn" style="color:var(--teal);">${mobDays}</div><div class="sl">mob days</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">Weight Goal Progress</div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;"><span>Start: ${startW} lbs</span><span>Goal: ${goal} lbs</span></div>
+        <div style="background:#1a1a1a;border-radius:4px;height:8px;overflow:hidden;"><div style="background:var(--red);height:100%;width:${pct}%;border-radius:4px;transition:width 0.5s;"></div></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;">Current: <strong style="color:var(--red);">${curW} lbs</strong> · ${pct}% to goal</div>
+      </div>
+      <div class="card">
+        <div class="ct">90-Day Timeline</div>
+        <div style="background:#1a1a1a;border-radius:4px;height:8px;overflow:hidden;margin-bottom:6px;"><div style="background:var(--accent);height:100%;width:${dayPct}%;border-radius:4px;"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);"><span>Day 1</span><span style="color:var(--accent);font-weight:700;">Day ${S.dayN}</span><span>Day 90</span></div>
+      </div>
+      ${ws.length>1?`<div class="card"><div class="ct">Weight Chart</div>${weightChart(ws)}</div>`:''}
+      ${runs.length>0?`
+        <div class="card">
+          <div class="ct">Run History</div>
+          ${runs.slice().reverse().slice(0,8).map(r=>`
+            <div class="lentry">
+              <div>
+                <div style="font-size:13px;font-weight:600;">${r.distanceMi} miles · ${r.timeMin} min</div>
+                <div style="font-size:11px;color:var(--muted);">${fmtDate(r.date)} · ${pace(r.distanceMi,r.timeMin)} avg pace</div>
+              </div>
+              <span style="font-size:14px;color:var(--blue);font-weight:800;">${r.distanceMi}</span>
+            </div>`).join('')}
+        </div>`:''}
+      <div class="card">
+        <div class="ct">Mobility Calendar (last 14 days)</div>
+        ${mobCal()}
+      </div>
+    </div>`;
+}
+
+function weightChart(ws){
+  const W=320,H=90,P=18;
+  const vals=ws.map(w=>w.weight);
+  const min=Math.min(...vals)-2,max=Math.max(...vals)+2;
+  const xs=ws.map((_,i)=>P+(i/(ws.length-1||1))*(W-P*2));
+  const ys=vals.map(v=>P+(1-(v-min)/(max-min||1))*(H-P*2));
+  const path=xs.map((x,i)=>`${i===0?'M':'L'}${x},${ys[i]}`).join(' ');
+  const area=`M${xs[0]},${H-P} ${xs.map((x,i)=>`L${x},${ys[i]}`).join(' ')} L${xs[xs.length-1]},${H-P} Z`;
+  return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;" preserveAspectRatio="none">
+    <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF4D6D" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FF4D6D" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#wg)"/>
+    <path d="${path}" stroke="#FF4D6D" stroke-width="2" fill="none" stroke-linejoin="round"/>
+    ${xs.map((x,i)=>`<circle cx="${x}" cy="${ys[i]}" r="3" fill="#FF4D6D"/>`).join('')}
+  </svg>
+  <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px;">
+    <span>${fmtDate(ws[0].date)} · ${vals[0]} lbs</span><span>${fmtDate(ws[ws.length-1].date)} · ${vals[vals.length-1]} lbs</span>
+  </div>`;
+}
+
+function mobCal(){
+  const now=new Date();
+  const days=[];
+  for(let i=13;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const m=S.d.mobility.find(x=>x.date===ds);days.push({ds,m});}
+  return`<div style="display:flex;gap:5px;flex-wrap:wrap;">
+    ${days.map(({ds,m})=>{const both=m&&m.morning&&m.evening;const done=m&&(m.morning||m.evening);return`<div style="flex:1;min-width:18px;aspect-ratio:1;border-radius:4px;background:${both?'var(--teal)':done?'rgba(45,212,191,0.4)':'#1a1a1a'};border:1px solid var(--border);" title="${ds}"></div>`;}).join('')}
+  </div>
+  <div style="font-size:10px;color:var(--muted);margin-top:6px;">Last 14 days · Bright teal = both sessions done</div>`;
+}
+
+// ─── MODALS ───
+function renderModal(){
+  const m=S.modal;
+  let body='';
+  if(m==='weight'){
+    body=`<div class="mtitle">Log Weight</div>
+      <div class="igroup"><label class="ilabel">Weight (lbs)</label><input class="input" type="number" id="m-w" placeholder="215" inputmode="decimal" step="0.1"></div>
+      <button class="btn btn-p" data-save="weight">Save Weight</button>`;
+  } else if(m==='run'){
+    body=`<div class="mtitle">Log Run</div>
+      <div class="igroup"><label class="ilabel">Distance (miles)</label><input class="input" type="number" id="m-dist" placeholder="1.5" inputmode="decimal" step="0.1"></div>
+      <div class="igroup"><label class="ilabel">Time (minutes)</label><input class="input" type="number" id="m-time" placeholder="20" inputmode="decimal" step="1"></div>
+      <button class="btn btn-p" style="background:var(--blue);color:#000;" data-save="run">Save Run</button>`;
+  } else if(m==='workout'){
+    const ph=PHASES[S.phase];
+    body=`<div class="mtitle">Log Workout</div>
+      <div class="igroup"><label class="ilabel">Select Workout Day</label>
+        <div class="grid2" id="day-sel" style="margin-top:4px;">
+          ${ph.days.map(d=>`<div class="dayopt" data-dp="${d.id}"><div style="font-size:13px;font-weight:700;">${d.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">${d.focus}</div></div>`).join('')}
+        </div>
+      </div>
+      <button class="btn btn-p" data-save="workout">Save Workout</button>`;
+  }
+  return`<div class="modal" id="modal-ov">
+    <div class="msheet"><div class="mhandle"></div>${body}<button class="btn btn-s" data-cm style="margin-bottom:0;">Cancel</button></div>
+  </div>`;
+}
+
+// ─── EVENTS ───
+function bind(){
+  document.getElementById('app').addEventListener('click',e=>{
+    const tab=e.target.closest('[data-tab]');
+    if(tab){S.tab=tab.dataset.tab;render();return;}
+
+    const pp=e.target.closest('[data-pp]');
+    if(pp){S.pp=parseInt(pp.dataset.pp);render();return;}
+
+    const tog=e.target.closest('[data-tog]');
+    if(tog){const c=document.getElementById(tog.dataset.tog);if(c)c.classList.toggle('open');return;}
+
+    const modal=e.target.closest('[data-modal]');
+    if(modal){S.modal=modal.dataset.modal;selDay=null;render();return;}
+
+    const cm=e.target.closest('[data-cm]');
+    if(cm){S.modal=null;render();return;}
+
+    const ov=e.target.id==='modal-ov';
+    if(ov){S.modal=null;render();return;}
+
+    const mob=e.target.closest('[data-mob]');
+    if(mob){S.togMob(mob.dataset.mob);render();return;}
+
+    const mt=e.target.closest('[data-mt]');
+    if(mt){S.mt=mt.dataset.mt;render();return;}
+
+    const mr=e.target.closest('[data-mr]');
+    if(mr){S.mr=mr.dataset.mr;render();return;}
+
+    const mobgo=e.target.closest('[data-mob-go]');
+    if(mobgo){S.tab='mobility';render();return;}
+
+    const qlog=e.target.closest('[data-qlog]');
+    if(qlog){S.logWorkout(qlog.dataset.qlog);render();return;}
+
+    const save=e.target.closest('[data-save]');
+    if(save){
+      const t=save.dataset.save;
+      if(t==='weight'){
+        const w=parseFloat(document.getElementById('m-w')?.value);
+        if(isNaN(w)||w<50||w>999){alert('Please enter a valid weight.');return;}
+        S.logW(w);
+      }else if(t==='run'){
+        const d=parseFloat(document.getElementById('m-dist')?.value);
+        const ti=parseFloat(document.getElementById('m-time')?.value);
+        if(isNaN(d)||isNaN(ti)||d<=0||ti<=0){alert('Please fill in distance and time.');return;}
+        S.logRun(d,ti);
+      }else if(t==='workout'){
+        if(!selDay){alert('Please select a workout day.');return;}
+        S.logWorkout(selDay);
+      }
+      S.modal=null;render();return;
+    }
+
+    const dp=e.target.closest('[data-dp]');
+    if(dp){
+      selDay=dp.dataset.dp;
+      document.querySelectorAll('[data-dp]').forEach(d=>{
+        d.classList.toggle('sel',d.dataset.dp===selDay);
+      });
+      return;
+    }
+  });
+}
+
+// ─── BOOT ───
+S.load();
+render();
+
+// Register service worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
